@@ -15,7 +15,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { Icon } from 'react-native-elements'
 import { ClientContext } from "../contexts/clientContext";
 
-import { API_URL } from './../../config'
 import axios from "axios"
 
 const backgroundBlur = require("../../assets/imgs/background_blur.png")
@@ -24,6 +23,8 @@ const buttonAcessar = require("../../assets/imgs/Button-acessar.png")
 
 
 const Login = props => {
+  const API_URL = process.env.EXPO_PUBLIC_API_URL
+  
   const [email, setEmail] = useState('paulocjnetopcjn@gmail.com')
   const [senha, setSenha] = useState('P22072004n')
   const [check, setCheck] = useState(false)

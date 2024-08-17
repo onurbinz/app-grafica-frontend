@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,16 +11,34 @@ import { useNavigation } from '@react-navigation/native';
 import { ClientContext } from "../contexts/clientContext";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import MaskInput, { Masks } from "react-native-mask-input";
+
 const InputPerfilEditar = props => {
-  
   const navigation = useNavigation()
-  
+
+  const [typeMask, setTypeMask] = useState(null)
+
   const { editClient } = useContext(ClientContext)
-  
+
   const dadosDoCampo = {
     label: props.label,
     field: props.field
   }
+  
+  useEffect(() => {
+    switch (props.field) {
+      case "cpf":
+        setTypeMask(Masks.BRL_CPF)
+        break
+      case "cep":
+        setTypeMask([/\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/])
+        break
+      default:
+        setTypeMask(null)
+    }
+  }, [])
+
+
 
   return (
     <TouchableOpacity
@@ -28,10 +46,13 @@ const InputPerfilEditar = props => {
     >
       <View style={styles.viewField}>
         <Text style={styles.textBold}>{props.label}</Text>
-        <Text style={styles.input}>
-          {editClient[props.field]}
-        </Text>
-        <Icon 
+        <MaskInput
+          style={styles.input}
+          value={editClient[props.field]}
+          mask={typeMask}
+          editable={false}
+        />
+        <Icon
           name="arrow-right"
           size={16}
         />

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,18 @@ import {
   TouchableOpacity
 } from "react-native"
 import { Icon } from "react-native-elements";
+import MaskInput, { Masks } from "react-native-mask-input";
 
 import { ClientContext } from "../contexts/clientContext";
 
 const InputPerfilEditar = props => {
+  const [typeBoard, setTypeBoard] = useState('')
+  const [typeMask, setTypeMask] = useState(null)
+
   const label = props.route.params.label
   const field = props.route.params.field
 
-  const { client, editClient, setEditClient } = useContext(ClientContext)
+  const { client, setEditClient } = useContext(ClientContext)
 
   const [text, setText] = useState(client[field])
 
@@ -29,14 +33,42 @@ const InputPerfilEditar = props => {
     })
   }
 
+  useEffect(() => {
+    if (["cpf", "cep", "numero"].includes(field)) {
+      setTypeBoard('numeric')
+    } else {
+      setTypeBoard('default')
+    }
+
+    switch (field) {
+      case "cpf":
+        setTypeMask(Masks.BRL_CPF)
+        break
+      case "cep":
+        setTypeMask([/\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/])
+        break
+      default:
+        setTypeMask(null)
+    }
+  }, [])
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.viewField}>
         <Text style={styles.textBold}>{label}</Text>
-        <TextInput
-          style={styles.input}
+        {/* <TextInput
           value={text}
           onChangeText={(newText) => setText(newText)}
+          keyboardType={typeBoard}
+          /> */}
+        <MaskInput
+          style={styles.input}
+          value={text}
+          keyboardType={typeBoard}
+          onChangeText={(_, unmasked) => {
+            setText(unmasked)
+          }}
+          mask={typeMask}
         />
       </View>
       <TouchableOpacity

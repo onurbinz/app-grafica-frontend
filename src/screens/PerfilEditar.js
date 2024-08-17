@@ -40,8 +40,8 @@ const PerfilEditar = props => {
           <InputPerfilEditar label="Cidade:" field="cidade" />
           <InputPerfilEditar label="UF:" field="uf" />
           <InputPerfilEditar label="Rua:" field="rua" />
-          <InputPerfilEditar label="Bairro:" field="bairro" />
           <InputPerfilEditar label="Numero:" field="numero" />
+          <InputPerfilEditar label="Bairro:" field="bairro" />
           <InputPerfilEditar label="CEP:" field="cep" />
           <InputPerfilEditar label="Complemento:" field="complemento" />
 
