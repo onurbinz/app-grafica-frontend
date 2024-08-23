@@ -8,14 +8,15 @@ import {
   StyleSheet,
   ImageBackground,
   TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native"
 import BottomSheet from "@gorhom/bottom-sheet"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { Icon } from 'react-native-elements'
 import { ClientContext } from "../contexts/clientContext";
+import { AdressContext } from "../contexts/adressContext"
 
 import axios from "axios"
+const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 const backgroundBlur = require("../../assets/imgs/background_blur.png")
 const logo = require("../../assets/imgs/logo2.png")
@@ -23,7 +24,6 @@ const buttonAcessar = require("../../assets/imgs/Button-acessar.png")
 
 
 const Login = props => {
-  const API_URL = process.env.EXPO_PUBLIC_API_URL
   
   const [email, setEmail] = useState('paulocjnetopcjn@gmail.com')
   const [senha, setSenha] = useState('P22072004n')
@@ -34,6 +34,7 @@ const Login = props => {
   const bottomSheetRef = useRef(null)
 
   const clientContext = useContext(ClientContext)
+  const adressContext = useContext(AdressContext)
 
   const snapPoints = useMemo(() => ['62%', '90%'], []);
 
@@ -69,6 +70,7 @@ const Login = props => {
         setMensagemErro(err.response.data)
       }
     }
+    adressContext.setIsLoggedIn(true)
   }
 
   return (

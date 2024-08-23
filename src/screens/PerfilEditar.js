@@ -1,4 +1,5 @@
-import React, { useContext } from "react"
+// appearance
+import React, { useContext, useEffect, useState } from "react"
 import {
   View,
   Text,
@@ -9,26 +10,45 @@ import {
   ScrollView,
   KeyboardAvoidingView
 } from "react-native"
-import { Icon } from "react-native-elements"
+import { Icon, Input } from "react-native-elements"
 
+// context
 import { ClientContext } from "../contexts/clientContext"
+import { AdressContext } from "../contexts/adressContext"
 
+// components
 import InputPerfilEditar from "../components/InputPerfilEditar"
+
+// integration
+import axios from "axios"
+const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 const fotoPerfil = require('./../../assets/imgs/perfil/eu_na_bis.jpg')
 
 
 const PerfilEditar = props => {
 
-  const { setClient, editClient } = useContext(ClientContext)
+  const { adress } = useContext(AdressContext)
+  const { client } = useContext(ClientContext)
 
-  const saveUpdatedClient = () => {
-    setClient(editClient)
+  const save = () => {
+    saveUpdatedClient()
+    props.navigation.navigate('Perfil')
   }
+
+  const saveUpdatedClient = async () => {
+    try {
+      await axios.put(`${API_URL}/api/clientes/${client.id}`, client)
+    } catch (err) {
+      console.error(err.response.data);
+    }
+  }
+
+  console.log("PerfilEditar client", client);
 
   return (
     <KeyboardAvoidingView behavior="padding">
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollStyle}>
         <View style={styles.container}>
 
           <View style={styles.containerImg}>
@@ -36,24 +56,26 @@ const PerfilEditar = props => {
             <Icon name="image-edit" type="material-community" size={30} style={styles.editImage} />
           </View>
           <InputPerfilEditar label="Nome:" field="nome" />
+          <InputPerfilEditar label="Telefone:" field="telefone" />
           <InputPerfilEditar label="CPF:" field="cpf" />
-          <InputPerfilEditar label="Cidade:" field="cidade" />
-          <InputPerfilEditar label="UF:" field="uf" />
-          <InputPerfilEditar label="Rua:" field="rua" />
-          <InputPerfilEditar label="Numero:" field="numero" />
-          <InputPerfilEditar label="Bairro:" field="bairro" />
-          <InputPerfilEditar label="CEP:" field="cep" />
-          <InputPerfilEditar label="Complemento:" field="complemento" />
+          <TouchableOpacity
+            onPress={() => { props.navigation.navigate('PerfilEditarEndereco', { enderecoId: client.enderecoId, clientId: client.id }) }}
+          >
+            <View style={styles.viewField}>
+              <Text style={styles.textBold}>Adicionar endereço </Text>
+              <Icon
+                name="add-circle"
+                color={'green'}
+              />
+            </View>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.containerSave}
-            onPress={() => {
-              saveUpdatedClient()
-              props.navigation.navigate('Perfil')
-            }}
+            onPress={save}
           >
             <Text style={styles.save}>Salvar</Text>
-            <Icon name="done"/>
+            <Icon name="done" />
           </TouchableOpacity>
         </View >
       </ScrollView>
@@ -61,13 +83,14 @@ const PerfilEditar = props => {
   )
 }
 
+
 const styles = StyleSheet.create({
   container: {
     padding: 30,
     justifyContent: 'flex-start',
     alignItems: 'center',
     flex: 1,
-    backgroundColor: '#FDFDFD'
+    backgroundColor: '#FDFDFD',
   },
   img: {
     height: 100,
@@ -83,7 +106,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
-    width: (Dimensions.get('window').width - 60) / 3,
+    width: (Dimensions.get('window').width - 60) / 2,
     backgroundColor: '#63b620',
     overflow: 'hidden',
     borderRadius: 10,
@@ -97,7 +120,27 @@ const styles = StyleSheet.create({
   },
   editImage: {
     marginLeft: 20
-  }
+  },
+  scrollStyle: {
+    height: '100%'
+  },
+  viewField: {
+    borderRadius: 10,
+    backgroundColor: '#EBEBEB',
+    padding: 10,
+    width: Dimensions.get('window').width - 60,
+    marginTop: 16,
+    overflow: 'hidden',
+    fontFamily: 'Poppins-Light',
+    fontSize: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  textBold: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16
+  },
 })
 
 

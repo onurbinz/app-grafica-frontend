@@ -6,6 +6,7 @@ import ProductsProvider from './contexts/productsContext';
 import ClientProvider from './contexts/clientContext.js';
 
 import Teste from './Teste.js'
+import AdressProvider from './contexts/adressContext.js';
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -22,10 +23,12 @@ export default function App() {
 
   return (
     <ClientProvider>
-      <ProductsProvider>
-        <Navigator />
-        {/* <Teste/> */}
-      </ProductsProvider>
-    </ClientProvider>
+      <AdressProvider>
+        <ProductsProvider>
+          <Navigator />
+          {/* <Teste/> */}
+        </ProductsProvider>
+      </AdressProvider>
+    </ClientProvider >
   );
 }

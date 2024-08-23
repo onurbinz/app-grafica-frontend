@@ -4,60 +4,85 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-  TouchableOpacity
 } from "react-native"
-import { useNavigation } from '@react-navigation/native';
 
 import { ClientContext } from "../contexts/clientContext";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { AdressContext } from "../contexts/adressContext";
 
 import MaskInput, { Masks } from "react-native-mask-input";
 
 const InputPerfilEditar = props => {
-  const navigation = useNavigation()
 
-  const [typeMask, setTypeMask] = useState(null)
-
-  const { editClient } = useContext(ClientContext)
-
-  const dadosDoCampo = {
-    label: props.label,
-    field: props.field
-  }
-  
-  useEffect(() => {
+  useEffect(() => { 
     switch (props.field) {
       case "cpf":
         setTypeMask(Masks.BRL_CPF)
+        setTypeBoard('numeric')
         break
       case "cep":
         setTypeMask([/\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/])
+        setTypeBoard('numeric')
         break
+      case "telefone":
+        setTypeMask(['+', '5', '5', ' '].concat(Masks.BRL_PHONE))
+        setTypeBoard('numeric')
+        break;
       default:
         setTypeMask(null)
+        setTypeBoard('default')
     }
+    whichTableDataFrom()
   }, [])
 
+  const whichTableDataFrom = () => {
+    if (['nome', 'cpf', 'telefone'].includes(props.field)) {
+      setValue(client[props.field])
+      setTable('client')
+    } else {
+      setValue(adress[props.field])
+      setTable('adress')
+    }
+  }
 
+  const [value, setValue] = useState('')
+  const [table, setTable] = useState(null)
+  const [typeMask, setTypeMask] = useState(null)
+  const [typeBoard, setTypeBoard] = useState(null)
+
+  const { client, setClient } = useContext(ClientContext)
+  const { adress, setAdress } = useContext(AdressContext)
+
+  const saveField = () => {
+    if (table === 'client') {
+      setClient((lastClient) => {
+        return {
+          ...lastClient,
+          [props.field]: value || null
+        }
+      })
+    } else {
+      setAdress((lastAdress) => {
+        return {
+          ...lastAdress,
+          [props.field]: value || null
+        }
+      })
+    }
+  }
 
   return (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('PerfilEditarCampo', dadosDoCampo)}
-    >
-      <View style={styles.viewField}>
-        <Text style={styles.textBold}>{props.label}</Text>
-        <MaskInput
-          style={styles.input}
-          value={editClient[props.field]}
-          mask={typeMask}
-          editable={false}
-        />
-        <Icon
-          name="arrow-right"
-          size={16}
-        />
-      </View>
-    </TouchableOpacity>
+    <View style={styles.viewField}>
+      <Text style={styles.textBold}>{props.label}</Text>
+      <MaskInput
+        style={styles.input}
+        value={value}
+        onChangeText={(newText) => setValue(newText)}
+        mask={typeMask}
+        editable={true}
+        keyboardType={typeBoard}
+        onBlur={saveField}
+      />
+    </View>
   )
 }
 

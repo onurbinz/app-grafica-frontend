@@ -1,4 +1,4 @@
-import React, { useContext, use, useState } from "react";
+import React, { useContext, useEffect, useState, } from "react";
 import {
   View,
   Text,
@@ -6,63 +6,123 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  TextInput
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import { Icon } from "react-native-elements";
+
 import { ClientContext } from "../contexts/clientContext";
+import { AdressContext } from "../contexts/adressContext"
+import axios from "axios";
 
 const fotoPerfil = require('./../../assets/imgs/perfil/eu_na_bis.jpg')
+const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 const Perfil = props => {
 
-  const { client } = useContext(ClientContext)
-  
-  const data = {
-    name: client.nome,
-    cpf: client.cpf,
-    adress: {
-      city: client.cidade,
-      uf: client.uf,
-      street: client.rua,
-      neighborhood: client.bairro,
-      number: client.numero,
-      cep: client.cep,
-      complement: client.complemento,
+  const { client, setClient } = useContext(ClientContext)
+  const { adress, setAdress } = useContext(AdressContext)
+
+  const [refreshing, setRefreshing] = useState(false)
+
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      const { clientBD, enderecoBD } = await fetchClient();
+      setClient(clientBD || {});
+      setAdress(enderecoBD || {});
+    } catch (err) {
+      console.error("Erro ao buscar dados:", err);
+    } finally {
+      setRefreshing(false);
     }
   }
 
+  const fetchClient = async () => {
+    const infos = {}
+    try {
+      const response = await axios.get(`${API_URL}/api/clientes/${client.id}`)
+      const clientBD = response.data
+      infos.clientBD = clientBD
+    } catch (err) {
+      console.error("ta no erro do cliente", err.response.data);
+    }
+
+    if (client.enderecoId) {
+      try {
+        const response = await axios.get(`${API_URL}/api/endereco/${client.enderecoId}`)
+        const enderecoBD = response.data
+        infos.enderecoBD = enderecoBD
+      } catch (err) {
+        console.error("ta no erro do endereco", err.response.data);
+      }
+    }
+
+    return infos
+  }
+
+
+
+  const dataClient = {
+    name: client.nome,
+    cpf: client.cpf || "",
+    telefone: client.telefone || ""
+  }
+
+  const dataAdress = {
+    city: adress.cidade || "",
+    uf: adress.uf || "",
+    street: adress.rua || "",
+    neighborhood: adress.bairro || "",
+    number: adress.numero || "",
+    cep: adress.cep || "",
+    complement: adress.complemento || "",
+  }
+
   return (
-    <View style={styles.container}>
-      <Image source={fotoPerfil} style={styles.img} />
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing} onRefresh={onRefresh}
+        />
+      }
+    >
+      <View style={styles.container}>
+        <Image source={fotoPerfil} style={styles.img} />
 
-      <Text style={styles.viewField}> <Text style={styles.textBold}>Nome: </Text>
-        {data.name}
-      </Text>
-      <Text style={styles.viewField}> <Text style={styles.textBold}>CPF: </Text>
-        {data.cpf}
-      </Text>
+        <Text style={styles.viewField}> <Text style={styles.textBold}>Nome: </Text>
+          {dataClient.name}
+        </Text>
+        <Text style={styles.viewField}> <Text style={styles.textBold}>CPF: </Text>
+          {dataClient.cpf}
+        </Text>
+        <Text style={styles.viewField}> <Text style={styles.textBold}>Telefone: </Text>
+          {dataClient.telefone}
+        </Text>
 
-      <View style={styles.viewField}>
-        <Text style={styles.textBold}>Endereço de entrega:</Text>
-        <View style={styles.endereco}>
-          <Text ><Text style={styles.textBold}>Cidade: </Text>{data.adress.city}</Text>
-          <Text><Text style={styles.textBold}>UF: </Text>{data.adress.uf}</Text>
-          <Text><Text style={styles.textBold}>Rua: </Text>{data.adress.street}</Text>
-          <Text><Text style={styles.textBold}>Bairro: </Text>{data.adress.neighborhood}</Text>
-          <Text><Text style={styles.textBold}>Numero: </Text>{data.adress.number}</Text>
-          <Text><Text style={styles.textBold}>CEP: </Text>{data.adress.cep}</Text>
-          <Text><Text style={styles.textBold}>Complemento: </Text>{data.adress.complement}</Text>
+        <View style={styles.viewField}>
+          <Text style={styles.textBold}>Endereço de entrega:</Text>
+          <View style={styles.endereco}>
+            <Text ><Text style={styles.textBold}>Cidade: </Text>{dataAdress.city}</Text>
+            <Text><Text style={styles.textBold}>UF: </Text>{dataAdress.uf}</Text>
+            <Text><Text style={styles.textBold}>Rua: </Text>{dataAdress.street}</Text>
+            <Text><Text style={styles.textBold}>Bairro: </Text>{dataAdress.neighborhood}</Text>
+            <Text><Text style={styles.textBold}>Numero: </Text>{dataAdress.number}</Text>
+            <Text><Text style={styles.textBold}>CEP: </Text>{dataAdress.cep}</Text>
+            <Text><Text style={styles.textBold}>Complemento: </Text>{dataAdress.complement}</Text>
+          </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.containerLogout}
+          onPress={() => props.navigation.navigate('Login')}
+        >
+          <Text style={styles.logout}>Sair</Text>
+          <Icon name="logout" />
+        </TouchableOpacity>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.containerLogout}
-        onPress={() => props.navigation.navigate('Login')}
-      >
-        <Text style={styles.logout}>Sair</Text>
-        <Icon name="logout"/>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   )
 }
 

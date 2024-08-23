@@ -10,8 +10,6 @@ import {
 
 const CardProduto = props => {
 
-  console.log("CardProduto", (props.id));
-
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -19,10 +17,10 @@ const CardProduto = props => {
     >
       <View style={styles.container}>
         <Image
-          source={props.img}
+          source={{ uri: props.imagem }}
           style={styles.img}
         />
-        <Text style={styles.title} numberOfLines={2}>{props.title}</Text>
+        <Text style={styles.title} numberOfLines={2}>{props.titulo}</Text>
         <View style={styles.button}>
           <Text style={styles.textButton}>+ Detalhes</Text>
         </View>

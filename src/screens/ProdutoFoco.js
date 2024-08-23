@@ -12,24 +12,22 @@ import {
 import { ProductsContext } from "../contexts/productsContext";
 import { Icon } from "react-native-elements";
 
-
 const ProdutoFoco = props => {
   const [quantidade, setQuantidade] = useState(0)
 
   const productData = useContext(ProductsContext).productData
-
   const chosenProduct = productData.find((item) => item.id === props.route.params.id)
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.title}>{chosenProduct.title}</Text>
-        <Image style={styles.img} source={chosenProduct.img} />
+        <Text style={styles.title}>{chosenProduct.titulo}</Text>
+        <Image style={styles.img} source={{ uri: chosenProduct.imagem, height: 350, width: 350 }} />
       </View>
       <View style={styles.infoContainer}>
         <Text style={styles.infoLabel}>Informações sobre o produto:</Text>
         <View style={styles.infoContent}>
-          <Text style={styles.infoText}>{chosenProduct.desc}</Text>
+          <Text style={styles.infoText}>{chosenProduct.descricao}</Text>
         </View>
       </View>
 

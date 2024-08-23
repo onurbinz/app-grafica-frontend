@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   View,
-  Text,
 } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import { Icon } from 'react-native-elements';
@@ -14,20 +13,16 @@ import Login from "../screens/Login";
 import Cadastro from "../screens/Cadastro";
 import Home from "../screens/Home";
 import Contato from "../screens/Contato";
-import Produtos from "../screens/Produtos";
 import Perfil from "../screens/Perfil";
 import Carrinho from "../screens/Carrinho";
 import ProdutoFoco from "../screens/ProdutoFoco";
 
-import { ClientContext } from "../contexts/clientContext"
 import PerfilEditar from "../screens/PerfilEditar";
-import PerfilEditarCampo from "../screens/PerfilEditarCampo";
+import PerfilEditarEndereco from "../screens/PerfilEditarEndereco";
 
 const Stack = createStackNavigator()
 
 const Navigator = () => {
-
-  const { isEditing, setIsEditing } = useContext(ClientContext)
 
   return (
     <NavigationContainer>
@@ -140,12 +135,11 @@ const Navigator = () => {
           }}
         />
         <Stack.Screen
-          name="PerfilEditarCampo"
-          component={PerfilEditarCampo}
+          name="PerfilEditarEndereco"
+          component={PerfilEditarEndereco}
           options={{
-            headerTitle: "",
+            headerTitle: "Editar Endereço",
           }}
-          
         />
       </Stack.Navigator>
     </NavigationContainer>
