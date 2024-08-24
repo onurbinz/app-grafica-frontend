@@ -60,7 +60,6 @@ const Login = props => {
         email,
         senha
       })
-      
       props.navigation.navigate("Home")
       props.navigation.canGoBack(false)
       clientContext.setClient(client.data)

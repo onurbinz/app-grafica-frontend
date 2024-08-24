@@ -6,36 +6,35 @@ import {
   Dimensions,
   ScrollView,
   TouchableOpacity,
-} from "react-native"
+} from "react-native";
 import { Icon } from "react-native-elements";
-
 import { AdressContext } from "../contexts/adressContext";
-
+import { ValidContext } from "../contexts/validationContext";
 import InputPerfilEditar from "../components/InputPerfilEditar";
 import axios from "axios";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const PerfilEditarEndereco = props => {
+  const { adress } = useContext(AdressContext);
+  const { valid, setValid } = useContext(ValidContext);
 
-  const { adress } = useContext(AdressContext)
-
-  const updateAdress = () => {
-    
-    if (props.route.params.enderecoId) {
+  const updateAdressBD = async () => {
+    if (valid) {
+      console.log(adress);
+      
       try {
-        axios.put(`${API_URL}/api/endereco/${props.route.params.enderecoId}`, adress)
+        if (props.route.params.enderecoId) {
+          await axios.put(`${API_URL}/api/endereco/${props.route.params.enderecoId}`, adress);
+        } else {
+          await axios.post(`${API_URL}/api/endereco/${props.route.params.clientId}`, adress);
+        }
+        props.navigation.navigate('PerfilEditar');
       } catch (err) {
-        console.error("nao foi possivel atualizar endereço (put)");
-      }
-    } else {
-      try {
-        axios.post(`${API_URL}/api/endereco/${props.route.params.clientId}`, adress)
-      } catch (err) {
-        console.error("nao foi possivel criar endereco (post)");
+        console.error("Erro ao atualizar/criar endereço:", err.response?.data || err.message);
       }
     }
-  }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,23 +42,20 @@ const PerfilEditarEndereco = props => {
       <InputPerfilEditar label="UF:" field="uf" />
       <InputPerfilEditar label="Bairro:" field="bairro" />
       <InputPerfilEditar label="Rua:" field="rua" />
-      <InputPerfilEditar label="Numero:" field="numero" />
-      <InputPerfilEditar label="CEP:" field="cep" />
+      <InputPerfilEditar label="Número:" field="numero" />
+      <InputPerfilEditar label="CEP:" field="cep" setValid={setValid} valid={valid} />
       <InputPerfilEditar label="Complemento:" field="complemento" />
       <TouchableOpacity
-        style={styles.containerSave}
-        onPress={() => {
-          updateAdress()
-          props.navigation.navigate('PerfilEditar')
-        }}
+        disabled={!valid}
+        style={valid ? styles.containerSave : [styles.containerSave, styles.disabled]}
+        onPress={updateAdressBD}
       >
         <Text style={styles.save}>Salvar endereço</Text>
         <Icon name="done" />
       </TouchableOpacity>
     </ScrollView>
-  )
-
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -107,6 +103,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 10
   },
-})
+  disabled: {
+    backgroundColor: '#AAAAAA',
+  }
+});
 
-export default PerfilEditarEndereco
+export default PerfilEditarEndereco;

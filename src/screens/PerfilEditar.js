@@ -1,5 +1,4 @@
-// appearance
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,81 +7,118 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  KeyboardAvoidingView
-} from "react-native"
-import { Icon, Input } from "react-native-elements"
+  KeyboardAvoidingView,
+  Alert
+} from "react-native";
+import { Icon } from "react-native-elements";
+import { ClientContext } from "../contexts/clientContext";
+import InputPerfilEditar from "../components/InputPerfilEditar";
+import axios from "axios";
+import { ValidContext } from "../contexts/validationContext";
+import { useFocusEffect } from "@react-navigation/native";
 
-// context
-import { ClientContext } from "../contexts/clientContext"
-import { AdressContext } from "../contexts/adressContext"
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const fotoPerfil = require('./../../assets/imgs/perfil/eu_na_bis.jpg');
 
-// components
-import InputPerfilEditar from "../components/InputPerfilEditar"
+const PerfilEditar = (props) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const { client } = useContext(ClientContext);
+  const { valid, setValid } = useContext(ValidContext);
 
-// integration
-import axios from "axios"
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+  useFocusEffect(
+    useCallback(() => {
+      setValid(true)
+    }, [])
+  )
 
-const fotoPerfil = require('./../../assets/imgs/perfil/eu_na_bis.jpg')
+  useEffect(() => {
+    const unsubscribe = props.navigation.addListener('beforeRemove', (e) => {
+      if (isSaving) {
+        return;
+      }
 
+      e.preventDefault();
 
-const PerfilEditar = props => {
+      Alert.alert(
+        'Descartar alterações?',
+        'Você tem alterações não salvas. Deseja descartá-las e sair?',
+        [
+          { text: "Não", style: 'cancel', onPress: () => { } },
+          {
+            text: "Sim",
+            style: 'destructive',
+            onPress: () => {
+              props.navigation.dispatch(e.data.action);
+            },
+          },
+        ]
+      );
+    });
 
-  const { adress } = useContext(AdressContext)
-  const { client } = useContext(ClientContext)
+    // Limpar o listener quando o componente é desmontado
+    return unsubscribe;
+  }, [props.navigation, valid, isSaving]);
 
-  const save = () => {
-    saveUpdatedClient()
-    props.navigation.navigate('Perfil')
-  }
+  const save = async () => {
+    if (valid) {
+      setIsSaving(true); // Definir isSaving para true ao iniciar o salvamento
+      try {
+        await saveUpdatedClient();
+        props.navigation.navigate('Perfil');
+        console.log("Estado do cliente salvo no BD: ", client);
+      } catch (err) {
+        console.error("Erro ao salvar cliente: ", err.response?.data || err.message);
+      } finally {
+        setIsSaving(false); // Resetar o estado após salvar
+      }
+    }
+  };
 
   const saveUpdatedClient = async () => {
     try {
-      await axios.put(`${API_URL}/api/clientes/${client.id}`, client)
+      await axios.put(`${API_URL}/api/clientes/${client.id}`, client);
     } catch (err) {
-      console.error(err.response.data);
+      console.error("Erro ao atualizar cliente: ", err.response?.data || err.message);
     }
-  }
-
-  console.log("PerfilEditar client", client);
+  };
 
   return (
-    <KeyboardAvoidingView behavior="padding">
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.scrollStyle}>
         <View style={styles.container}>
-
           <View style={styles.containerImg}>
             <Image source={fotoPerfil} style={styles.img} />
-            <Icon name="image-edit" type="material-community" size={30} style={styles.editImage} />
+            <TouchableOpacity style={styles.editImage}>
+              <Icon name="image-edit" type="material-community" size={30} />
+            </TouchableOpacity>
           </View>
           <InputPerfilEditar label="Nome:" field="nome" />
           <InputPerfilEditar label="Telefone:" field="telefone" />
-          <InputPerfilEditar label="CPF:" field="cpf" />
+          <InputPerfilEditar label="CPF:" field="cpf" setValid={setValid} valid={valid} />
           <TouchableOpacity
-            onPress={() => { props.navigation.navigate('PerfilEditarEndereco', { enderecoId: client.enderecoId, clientId: client.id }) }}
+            disabled={!valid}
+            onPress={() => {
+              props.navigation.navigate('PerfilEditarEndereco', { enderecoId: client.enderecoId, clientId: client.id });
+            }}
           >
             <View style={styles.viewField}>
-              <Text style={styles.textBold}>Adicionar endereço </Text>
-              <Icon
-                name="add-circle"
-                color={'green'}
-              />
+              <Text style={styles.textBold}>{client.enderecoId ? "Alterar" : "Adicionar"} endereço </Text>
+              <Icon name="add-circle" color={'green'} />
             </View>
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={styles.containerSave}
+            disabled={!valid}
+            style={valid ? styles.containerSave : [styles.containerSave, styles.disabled]}
             onPress={save}
           >
             <Text style={styles.save}>Salvar</Text>
             <Icon name="done" />
           </TouchableOpacity>
-        </View >
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
-}
-
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -110,7 +146,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#63b620',
     overflow: 'hidden',
     borderRadius: 10,
-    marginTop: 40,
+    marginTop: 20,
     flexDirection: 'row'
   },
   save: {
@@ -122,7 +158,7 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   scrollStyle: {
-    height: '100%'
+    flexGrow: 1
   },
   viewField: {
     borderRadius: 10,
@@ -139,9 +175,11 @@ const styles = StyleSheet.create({
   },
   textBold: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 16
+    fontSize: 16,
   },
-})
+  disabled: {
+    backgroundColor: '#AAAAAA',
+  }
+});
 
-
-export default PerfilEditar
+export default PerfilEditar;

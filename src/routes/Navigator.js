@@ -117,7 +117,7 @@ const Navigator = () => {
                   type="material-community"
                   size={30}
                   style={{ marginRight: 28 }}
-                  onPress={() => props.navigation.navigate('PerfilEditar')}
+                  onPress={() => props.navigation.navigate('PerfilEditar', )}
                 />
               )
             })

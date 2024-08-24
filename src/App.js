@@ -4,9 +4,10 @@ import * as Font from 'expo-font';
 import Navigator from "./routes/Navigator";
 import ProductsProvider from './contexts/productsContext';
 import ClientProvider from './contexts/clientContext.js';
+import AdressProvider from './contexts/adressContext.js';
+import ValidProvider from './contexts/validationContext.js';
 
 import Teste from './Teste.js'
-import AdressProvider from './contexts/adressContext.js';
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -22,13 +23,15 @@ export default function App() {
   fetchFonts()
 
   return (
-    <ClientProvider>
-      <AdressProvider>
-        <ProductsProvider>
-          <Navigator />
-          {/* <Teste/> */}
-        </ProductsProvider>
-      </AdressProvider>
-    </ClientProvider >
+    <ValidProvider>
+      <ClientProvider>
+        <AdressProvider>
+          <ProductsProvider>
+            <Navigator />
+            {/* <Teste/> */}
+          </ProductsProvider>
+        </AdressProvider>
+      </ClientProvider >
+    </ValidProvider>
   );
 }

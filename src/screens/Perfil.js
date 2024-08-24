@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, } from "react";
+import React, { useCallback, useContext, useEffect, useState, } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { Icon } from "react-native-elements";
 import { ClientContext } from "../contexts/clientContext";
 import { AdressContext } from "../contexts/adressContext"
 import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native";
 
 const fotoPerfil = require('./../../assets/imgs/perfil/eu_na_bis.jpg')
 const API_URL = process.env.EXPO_PUBLIC_API_URL
@@ -25,6 +26,18 @@ const Perfil = props => {
 
   const [refreshing, setRefreshing] = useState(false)
 
+  useFocusEffect(
+    useCallback(() => {
+      onRefresh()
+    }, [])
+  )
+
+  // useEffect(() => {
+  //   if (!isRefreshed) {
+  //     onRefresh()
+  //     setIsRefreshed(true)
+  //   }
+  // }, [adress, client])
 
   const onRefresh = async () => {
     setRefreshing(true)

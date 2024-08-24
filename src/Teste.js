@@ -19,7 +19,6 @@ const App = () => {
     bottomSheetModalRef.current?.present();
   }, []);
   const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
   }, []);
 
   // renders
